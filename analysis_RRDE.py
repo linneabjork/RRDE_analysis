@@ -1,5 +1,5 @@
 # Python script to automatize analysis of stability and activity
-# measurements. 
+# measurements.
 
 # import of modules
 import numpy as np
@@ -38,6 +38,7 @@ def get_disk_voltage_current(filepath, index):
 
     return V_disk_raw, I_disk_raw
 
+
 def get_ring_current(filepath, index):
     with open(filepath, "r") as file:
         data = file.readlines()
@@ -63,10 +64,13 @@ def get_ring_current(filepath, index):
 def compute_selectivity(I_ring, I_disk, efficiency):
     S = []
     for i in range(len(I_ring)):
-        elm = ((2*I_ring[i]/efficiency) / (-1 * I_disk[i] + I_ring[i]/efficiency)) *100
+        elm = (
+            (2 * I_ring[i] / efficiency) / (-1 * I_disk[i] + I_ring[i] / efficiency)
+        ) * 100
         S.append(elm)
-    
+
     return S
+
 
 # Checking the potential of the reference electrode.
 def HER_activity_check(voltage, current, x_lower_limit, x_upper_limit):
@@ -78,7 +82,7 @@ def HER_activity_check(voltage, current, x_lower_limit, x_upper_limit):
     plt.xlabel("E [V]")
     plt.ylabel("I [mA]")
 
-    return 
+    return
 
 
 # Correction to RHE potential with voltage as a list
@@ -86,14 +90,6 @@ def RHE_correction(voltage, reference):
     for i in range(len(voltage)):
         voltage[i] = voltage[i] + reference
     return voltage
-
-
-def RHE_correction_background(background_matrix, reference):
-    for j in range(len(background_matrix[0])):
-        if j % 2 == 0:
-            for i in range(len(background_matrix)):
-                background_matrix[i][j] = background_matrix[i][j] + reference
-    return background_matrix
 
 
 # IR-drop correction
