@@ -13,7 +13,7 @@ import csv
 
 
 # Extract voltage and current from data file. index indicates how many lines of info to be removed
-def get_disc_voltage_current(filepath, index):
+def get_disk_voltage_current(filepath, index):
     with open(filepath, "r") as file:
         data = file.readlines()
         i = 0
@@ -26,17 +26,17 @@ def get_disc_voltage_current(filepath, index):
 
         del data[0:index]  # information about the measurement, remove from data
 
-        V_disc_raw = []
-        I_disc_raw = []
+        V_disk_raw = []
+        I_disk_raw = []
         for i in range(len(data)):
-            V_disc_raw.insert(
+            V_disk_raw.insert(
                 i, float(data[i][1].replace(",", "."))
             )  # string to float. Use "."as decimal sign
-            I_disc_raw.insert(i, float(data[i][2].replace(",", ".")))
+            I_disk_raw.insert(i, float(data[i][2].replace(",", ".")))
 
-        I_disc_raw = [i * 1000 for i in I_disc_raw]  # convert to mA
+        I_disk_raw = [i * 1000 for i in I_disk_raw]  # convert to mA
 
-    return V_disc_raw, I_disc_raw
+    return V_disk_raw, I_disk_raw
 
 def get_ring_current(filepath, index):
     with open(filepath, "r") as file:
@@ -60,28 +60,25 @@ def get_ring_current(filepath, index):
     return I_ring_raw
 
 
+def compute_selectivity(I_ring, I_disk, efficiency):
+    S = []
+    for i in range(len(I_ring)):
+        elm = ((2*I_ring[i]/efficiency) / (-1 * I_disk[i] + I_ring[i]/efficiency)) *100
+        S.append(elm)
+    
+    return S
+
 # Checking the potential of the reference electrode.
-def reference_check(voltage, current, x_lower_limit, x_upper_limit):
+def HER_activity_check(voltage, current, x_lower_limit, x_upper_limit):
     zero_current_x = np.linspace(x_lower_limit, x_upper_limit, len(voltage))
     zero_current_y = np.linspace(0, 0, len(current))
 
-    intersection_indices = np.argwhere(
-        np.diff(np.sign(current - zero_current_y))
-    ).flatten()
-    ref_potential_forward = voltage[intersection_indices[0]]
-    ref_potential_backward = voltage[intersection_indices[1]]
-
-    print("Shift by", ref_potential_forward, "V.")
-    reference = np.abs(ref_potential_forward)
-
     plt.plot(voltage, current)
     plt.plot(zero_current_x, zero_current_y)
-    plt.plot(ref_potential_forward, current[intersection_indices[0]], "x")
     plt.xlabel("E [V]")
     plt.ylabel("I [mA]")
-    plt.title("Reference check")
 
-    return reference
+    return 
 
 
 # Correction to RHE potential with voltage as a list
